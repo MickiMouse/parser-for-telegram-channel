@@ -1,7 +1,6 @@
-import os
-import datetime
+#!/usr/bin/python3.7
 
-while True:
-    if datetime.datetime.now().time() == datetime.time(0, 0, 0):
-        os.system('python parse_analytics.py')
-        os.system('python bot.py')
+import os
+
+os.system('python3.7 /home/denis/PycharmProjects/telegram-bot-analytics-sport/parse_analytics.py')
+os.system('python3.7 /home/denis/PycharmProjects/telegram-bot-analytics-sport/bot.py')

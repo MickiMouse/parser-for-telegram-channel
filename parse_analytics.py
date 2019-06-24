@@ -2,7 +2,7 @@ import json
 import requests
 
 from bs4 import BeautifulSoup
-from crendentials import BASE_URL
+from credentials import BASE_URL, PATH
 
 session = requests.Session()
 
@@ -52,21 +52,36 @@ def parse(content):
         text_list = [p.text.strip() for p in full_text]
         text_str = ' '.join(text_list)
 
-        data.append({'header': h1, 'content': text_str, 'time': times[i]})
+        data.append(
+            {
+                'header': h1,
+                'content': text_str,
+                'time': times[i]
+            }
+        )
         print(f'Have done {i+1} : {len(links)}')
-
     return data
 
 
-def main(url, filename):
+def main(url, filename='forecasts.json'):
     r = get_html(url)
     forecasts = parse(r)
 
-    with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(forecasts, file, indent=4)
+    with open(PATH + filename, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+
+    data_headers = set([data[i]['header'] for i in range(len(data))])
+    fore_headers = set([forecasts[i]['header'] for i in range(len(forecasts))])
+
+    filterheaders = fore_headers.difference(data_headers)
+    filterforecasts = [forecast for forecast in forecasts if forecast['header'] in filterheaders]
+
+    with open(PATH + filename, 'w', encoding='utf-8') as file:
+        json.dump(filterforecasts, file, indent=4, ensure_ascii=False)
 
     print('Save JSON')
     return 1
 
 
-main(BASE_URL + '/tips/tomorrow', 'forecasts.json')
+if __name__ == '__main__':
+    main(BASE_URL + '/tips/tomorrow')

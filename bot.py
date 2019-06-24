@@ -1,14 +1,22 @@
-import os
 import requests
 import json
+import datetime
+from credentials import channel, PATH, URL
 
-from crendentials import token_API, chanel
 
-try:
-    with open('forecasts.json', 'r') as file:
-        forecasts = json.load(file)
-except FileNotFoundError:
-    print('Прогнозы уже опубликованы')
+def send_message(chat_id, _text):
+    message = {'chat_id': chat_id, 'text': _text}
+    response = requests.post(URL + '/sendMessage', json=message)
+    return response.json()
+
+
+with open(PATH + 'forecasts.json', 'r') as file:
+    forecasts = json.load(file)
+
+if len(forecasts) == 0:
+    text = 'Прогнозы уже опубликованы'
+    now = datetime.datetime.now()
+    print(f'{text}, {now}')
     exit()
 
 for i in range(len(forecasts)):
@@ -16,10 +24,5 @@ for i in range(len(forecasts)):
     content = forecasts[i]['content']
     time = forecasts[i]['time']
 
-    string = f"""
-    {header}\n
-    {content}\n
-    Когда: {time}"""
-    r = requests.get(f'https://api.telegram.org/bot{token_API}/sendMessage?chat_id=@{chanel}&text={string}')
-
-os.remove('forecasts.json')
+    text = f"""{header}\n{content}\nКогда: {time}"""
+    send_message(f'@{channel}', text)
